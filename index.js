@@ -144,13 +144,25 @@ function open (self, mode, req) {
 
   function onopen (err, fd) {
     if (err) return req.callback(err)
-
     var old = self.fd
     self.fd = fd
-    if (!old) return oncloseoldfd(null)
 
-    // if we are moving from readonly -> readwrite, close the old fd
-    fs.close(old, oncloseoldfd)
+    // fs.open on Linux fails with an error on a directory, but on Windows it
+    // returns a file descriptor to the dir, which we don't want.
+    // https://nodejs.org/api/fs.html#fs_file_system_flags
+    fs.fstat(fd, function (err, stats) {
+      if (err) return onerrorafteropen(err)
+      if (stats.isDirectory()) {
+        var error = new Error('EISDIR: illegal operation on a directory, open \'' + self.filename + '\'')
+        error.code = 'EISDIR'
+        return onerrorafteropen(error)
+      }
+
+      if (!old) return oncloseoldfd(null)
+
+      // if we are moving from readonly -> readwrite, close the old fd
+      fs.close(old, oncloseoldfd)
+    })
   }
 
   function oncloseoldfd (err) {

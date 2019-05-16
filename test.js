@@ -173,6 +173,28 @@ tape('write/read big chunks', function (t) {
   }
 })
 
+tape('destroy', function (t) {
+  var name = gen()
+  var file = raf(name)
+
+  file.write(0, Buffer.from('hi'), function (err) {
+    t.error(err, 'no error')
+    file.read(0, 2, function (err, buf) {
+      t.error(err, 'no error')
+      t.same(buf, Buffer.from('hi'))
+      file.destroy(ondestroy)
+    })
+  })
+
+  function ondestroy (err) {
+    t.error(err, 'no error')
+    fs.stat(name, function (err) {
+      t.same(err && err.code, 'ENOENT', 'should be removed')
+      t.end()
+    })
+  }
+})
+
 tape('rmdir option', function (t) {
   var name = path.join('rmdir', ++i + '', 'folder', 'test.txt')
   var file = raf(name, {rmdir: true, directory: tmp})
