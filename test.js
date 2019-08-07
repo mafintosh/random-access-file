@@ -3,13 +3,12 @@ var tape = require('tape')
 var os = require('os')
 var path = require('path')
 var fs = require('fs')
-var mkdirp = require('mkdirp')
 var isWin = process.platform === 'win32'
 
 var tmp = path.join(os.tmpdir(), 'random-access-file-' + process.pid + '-' + Date.now())
 var i = 0
 
-mkdirp.sync(tmp)
+fs.mkdirSync(tmp, { recursive: true })
 
 tape('write and read', function (t) {
   var file = raf(gen())

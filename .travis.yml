@@ -4,6 +4,5 @@ os:
   - osx
   - windows
 node_js:
-  - '8'
   - '10'
   - node

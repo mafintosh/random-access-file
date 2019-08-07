@@ -1,7 +1,6 @@
 var inherits = require('util').inherits
 var RandomAccess = require('random-access-storage')
 var fs = require('fs')
-var mkdirp = require('mkdirp')
 var path = require('path')
 var constants = fs.constants || require('constants')
 
@@ -35,7 +34,7 @@ inherits(RandomAccessFile, RandomAccess)
 RandomAccessFile.prototype._open = function (req) {
   var self = this
 
-  mkdirp(path.dirname(this.filename), ondir)
+  fs.mkdir(path.dirname(this.filename), { recursive: true }, ondir)
 
   function ondir (err) {
     if (err) return req.callback(err)
